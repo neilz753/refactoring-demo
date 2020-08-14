@@ -14,20 +14,15 @@ function statement (invoice, play) {
     plays = play;
     let totalAmount = 0;
     let volumeCredits = 0;
-    let result = `Statement for ${invoice.customer}\n`;
-    const format = new Intl.NumberFormat("en-US", {
-        style: "currency", 
-        currency: "USD", 
-        minimumFractionDigits: 2}).format;
-    
+    let result = `Statement for ${invoice.customer}\n`;   
     for (let perf of invoice.performances) {
         volumeCredits += volumeCreditsFor(perf);
 
         // print line for this order
-        result += `  ${playFor(perf).name}: ${format(amountFor(perf)/100)} (${perf.audience} seats)\n`;
+        result += `  ${playFor(perf).name}: ${ucd(amountFor(perf))} (${perf.audience} seats)\n`;
         totalAmount += amountFor(perf);
     }
-    result += `Amount owned is ${format(totalAmount/100)}\n`;
+    result += `Amount owned is ${ucd(totalAmount)}\n`;
     result += `You earned ${volumeCredits} credits\n`;
     return result;
 }
@@ -63,6 +58,13 @@ function volumeCreditsFor(aPerformance) {
     result += Math.max(aPerformance.audience - 30, 0);
     if ("comedy" === playFor(aPerformance).type) result += Math.floor(aPerformance.audience / 5);
     return result;
+}
+
+function ucd(aNumber) {
+    return new Intl.NumberFormat("en-US", {
+    style: "currency", 
+    currency: "USD", 
+    minimumFractionDigits: 2}).format(aNumber/100);
 }
 
 module.exports = statement;
