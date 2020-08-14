@@ -1,4 +1,7 @@
+var plays;
+var invoice;
 /**
+ * 
  * 场景：
  * 戏剧演出团，演员要去各种场合表演戏剧。
  * 戏剧分为悲剧（tragedy）和喜剧（comedy）
@@ -8,25 +11,22 @@
  * @param {*} invoice 账单
  * @param {*} plays 演员
  */
-var plays;
-
-function statement (invoice, play) {
-    plays = play;
-    let totalAmount = 0;
-    let volumeCredits = 0;
+function statement (i, p) {
+    invoice = i, plays = p;
     let result = `Statement for ${invoice.customer}\n`;   
     for (let perf of invoice.performances) {
-        volumeCredits += volumeCreditsFor(perf);
-
         // print line for this order
         result += `  ${playFor(perf).name}: ${ucd(amountFor(perf))} (${perf.audience} seats)\n`;
-        totalAmount += amountFor(perf);
     }
-    result += `Amount owned is ${ucd(totalAmount)}\n`;
-    result += `You earned ${volumeCredits} credits\n`;
+    result += `Amount owned is ${ucd(totalAmount())}\n`;
+    result += `You earned ${totalVolumeCredits()} credits\n`;
     return result;
 }
 
+/**
+ * 计算当前剧的演出费用
+ * @param {*} aPerformance 剧
+ */
 function amountFor(aPerformance) {
     let result = 0;
     switch (playFor(aPerformance).type) {
@@ -49,10 +49,18 @@ function amountFor(aPerformance) {
     return result;
 }
 
+/**
+ * 获取当前剧的playID
+ * @param {*} aPerformance 剧
+ */
 function playFor(aPerformance) {
     return plays[aPerformance.playID];
 }
 
+/**
+ * 计算当前剧的观众量积分
+ * @param {*} aPerformance 剧
+ */
 function volumeCreditsFor(aPerformance) {
     let result = 0;
     result += Math.max(aPerformance.audience - 30, 0);
@@ -60,11 +68,37 @@ function volumeCreditsFor(aPerformance) {
     return result;
 }
 
+/**
+ * 格式化数字格式 美元
+ * @param {*} aNumber 美分数字
+ */
 function ucd(aNumber) {
     return new Intl.NumberFormat("en-US", {
     style: "currency", 
     currency: "USD", 
     minimumFractionDigits: 2}).format(aNumber/100);
+}
+
+/**
+ * 总金额
+ */
+function totalAmount() {
+    let result = 0;
+    for (let perf of invoice.performances) {
+        result += amountFor(perf);
+    }
+    return result;
+}
+
+/**
+ * 总观众量积分
+ */
+function totalVolumeCredits() {
+    let result = 0;
+    for (let perf of invoice.performances) {
+        result += volumeCreditsFor(perf);
+    }
+    return result;
 }
 
 module.exports = statement;
