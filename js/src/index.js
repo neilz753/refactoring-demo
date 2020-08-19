@@ -1,4 +1,4 @@
-import createStatementData from './createStatementData.js';
+const createStatementData = require("./createStatementData");
 /**
  * 
  * 场景：
@@ -10,7 +10,7 @@ import createStatementData from './createStatementData.js';
  * @param {*} invoice 账单
  * @param {*} plays 演员
  */
-function statement (invoice, plays) {
+module.exports.statement = function (invoice, plays) {
     return renderPlainText(createStatementData(invoice, plays));
 }
 
@@ -35,5 +35,3 @@ function renderPlainText(data) {
         minimumFractionDigits: 2}).format(aNumber/100);
     }
 }
-
-module.exports = statement;

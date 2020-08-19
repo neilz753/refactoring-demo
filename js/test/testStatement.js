@@ -1,5 +1,5 @@
 const assert = require('chai').assert;
-const statement = require('../src');
+const statement = require('../src').statement;
 const plays = require('./plays.json');
 const invoices = require('./invoices.json');
 
