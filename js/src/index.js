@@ -13,6 +13,8 @@ function statement (invoice, plays) {
     const statementData = {};
     statementData.customer = invoice.customer;
     statementData.performances = invoice.performances.map(enrichPerformance);
+    statementData.totalAmount = totalAmount(statementData);
+    statementData.totalVolumeCredits = totalVolumeCredits(statementData);
     return renderPlainText(statementData, plays);
   
     function enrichPerformance(aPerformance) {
@@ -20,6 +22,7 @@ function statement (invoice, plays) {
         const result = Object.assign({}, aPerformance);
         result.play = playFor(result);
         result.amount = amountFor(result);
+        result.volumeCredits = volumeCreditsFor(result);
         return result;
     }
 
@@ -57,20 +60,6 @@ function statement (invoice, plays) {
         return result;
     }
 
-
-}
-
-function renderPlainText(data, plays) {
-    let result = `Statement for ${data.customer}\n`;   
-    for (let perf of data.performances) {
-        // print line for this order
-        result += `  ${perf.play.name}: ${ucd(perf.amount)} (${perf.audience} seats)\n`;
-    }
-    result += `Amount owned is ${ucd(totalAmount())}\n`;
-    result += `You earned ${totalVolumeCredits()} credits\n`;
-    return result;
-
-
     /**
      * 计算当前剧的观众量积分
      * @param {*} aPerformance 剧
@@ -83,20 +72,9 @@ function renderPlainText(data, plays) {
     }
 
     /**
-    * 格式化数字格式 美元
-    * @param {*} aNumber 美分数字
-    */
-    function ucd(aNumber) {
-        return new Intl.NumberFormat("en-US", {
-        style: "currency", 
-        currency: "USD", 
-        minimumFractionDigits: 2}).format(aNumber/100);
-    }
-
-    /**
     * 总金额
     */
-    function totalAmount() {
+    function totalAmount(data) {
         let result = 0;
         for (let perf of data.performances) {
             result += perf.amount;
@@ -107,12 +85,34 @@ function renderPlainText(data, plays) {
     /**
     * 总观众量积分
     */
-    function totalVolumeCredits() {
+    function totalVolumeCredits(data) {
         let result = 0;
         for (let perf of data.performances) {
-            result += volumeCreditsFor(perf);
+            result += perf.volumeCredits;
         }
         return result;
+    }
+}
+
+function renderPlainText(data, plays) {
+    let result = `Statement for ${data.customer}\n`;   
+    for (let perf of data.performances) {
+        // print line for this order
+        result += `  ${perf.play.name}: ${ucd(perf.amount)} (${perf.audience} seats)\n`;
+    }
+    result += `Amount owned is ${ucd(data.totalAmount)}\n`;
+    result += `You earned ${data.totalVolumeCredits} credits\n`;
+    return result;
+
+    /**
+    * 格式化数字格式 美元
+    * @param {*} aNumber 美分数字
+    */
+    function ucd(aNumber) {
+        return new Intl.NumberFormat("en-US", {
+        style: "currency", 
+        currency: "USD", 
+        minimumFractionDigits: 2}).format(aNumber/100);
     }
 }
 
