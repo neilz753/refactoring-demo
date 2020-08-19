@@ -19,6 +19,7 @@ function statement (invoice, plays) {
         // 返回一个浅副本
         const result = Object.assign({}, aPerformance);
         result.play = playFor(result);
+        result.amount = amountFor(result);
         return result;
     }
 
@@ -29,18 +30,6 @@ function statement (invoice, plays) {
     function playFor(aPerformance) {
         return plays[aPerformance.playID];
     }
-
-}
-
-function renderPlainText(data, plays) {
-    let result = `Statement for ${data.customer}\n`;   
-    for (let perf of data.performances) {
-        // print line for this order
-        result += `  ${perf.play.name}: ${ucd(amountFor(perf))} (${perf.audience} seats)\n`;
-    }
-    result += `Amount owned is ${ucd(totalAmount())}\n`;
-    result += `You earned ${totalVolumeCredits()} credits\n`;
-    return result;
 
     /**
      * 计算当前剧的演出费用
@@ -67,6 +56,20 @@ function renderPlainText(data, plays) {
         }
         return result;
     }
+
+
+}
+
+function renderPlainText(data, plays) {
+    let result = `Statement for ${data.customer}\n`;   
+    for (let perf of data.performances) {
+        // print line for this order
+        result += `  ${perf.play.name}: ${ucd(perf.amount)} (${perf.audience} seats)\n`;
+    }
+    result += `Amount owned is ${ucd(totalAmount())}\n`;
+    result += `You earned ${totalVolumeCredits()} credits\n`;
+    return result;
+
 
     /**
      * 计算当前剧的观众量积分
@@ -96,7 +99,7 @@ function renderPlainText(data, plays) {
     function totalAmount() {
         let result = 0;
         for (let perf of data.performances) {
-            result += amountFor(perf);
+            result += perf.amount;
         }
         return result;
     }
